@@ -34,15 +34,21 @@ import org.photonvision.common.scripting.ScriptManager;
 import org.photonvision.common.util.TimedTaskManager;
 
 public class NetworkTablesManager {
-    private final NetworkTableInstance ntInstance = NetworkTableInstance.getDefault();
+    private NetworkTableInstance ntInstance = null;
     private final String kRootTableName = "/photonvision";
-    public final NetworkTable kRootTable = ntInstance.getTable(kRootTableName);
+    public NetworkTable kRootTable = null;
 
     private boolean isRetryingConnection = false;
 
     private NetworkTablesManager() {
-        ntInstance.addLogger(0, 255, new NTLogger()); // to hide error messages
-        TimedTaskManager.getInstance().addTask("NTManager", this::ntTick, 5000);
+        try {
+            ntInstance = NetworkTableInstance.getDefault();
+            kRootTable = ntInstance.getTable(kRootTableName);
+            ntInstance.addLogger(0, 255, new NTLogger()); // to hide error messages
+            TimedTaskManager.getInstance().addTask("NTManager", this::ntTick, 5000);
+        } catch (Exception err) {
+            logger.error("[NetworkTablesManager] Error creating NetworkTableInstance");
+        }
     }
 
     private static NetworkTablesManager INSTANCE;
@@ -81,6 +87,10 @@ public class NetworkTablesManager {
     }
 
     private void broadcastConnectedStatusImpl() {
+        if (ntInstance == null) {
+            return;
+        }
+
         HashMap<String, Object> map = new HashMap<>();
         var subMap = new HashMap<String, Object>();
 
@@ -113,6 +123,10 @@ public class NetworkTablesManager {
     }
 
     private void setClientMode(int teamNumber) {
+        if (ntInstance == null) {
+            return;
+        }
+        
         if (!isRetryingConnection) logger.info("Starting NT Client");
         ntInstance.stopServer();
         ntInstance.startClient4("photonvision");
@@ -122,6 +136,10 @@ public class NetworkTablesManager {
     }
 
     private void setServerMode() {
+        if (ntInstance == null) {
+            return;
+        }
+        
         logger.info("Starting NT Server");
         ntInstance.stopClient();
         ntInstance.startServer();
@@ -134,6 +152,10 @@ public class NetworkTablesManager {
     // isn't connected, same as clicking the save button in the settings menu (or restarting the
     // service)
     private void ntTick() {
+        if (ntInstance == null) {
+            return;
+        }
+        
         if (!ntInstance.isConnected()
                 && !ConfigManager.getInstance().getConfig().getNetworkConfig().runNTServer) {
             setConfig(ConfigManager.getInstance().getConfig().getNetworkConfig());
