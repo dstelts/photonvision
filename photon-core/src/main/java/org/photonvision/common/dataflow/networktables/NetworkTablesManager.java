@@ -109,8 +109,10 @@ public class NetworkTablesManager {
     }
 
     private void broadcastVersion() {
-        kRootTable.getEntry("version").setString(PhotonVersion.versionString);
-        kRootTable.getEntry("buildDate").setString(PhotonVersion.buildDate);
+        if (kRootTable != null) {
+            kRootTable.getEntry("version").setString(PhotonVersion.versionString);
+            kRootTable.getEntry("buildDate").setString(PhotonVersion.buildDate);
+        }
     }
 
     public void setConfig(NetworkConfig config) {
