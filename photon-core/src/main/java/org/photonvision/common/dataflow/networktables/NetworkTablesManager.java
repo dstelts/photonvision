@@ -46,7 +46,7 @@ public class NetworkTablesManager {
             kRootTable = ntInstance.getTable(kRootTableName);
             ntInstance.addLogger(0, 255, new NTLogger()); // to hide error messages
             TimedTaskManager.getInstance().addTask("NTManager", this::ntTick, 5000);
-        } catch (Exception err) {
+        } catch (java.lang.UnsatisfiedLinkError err) {
             logger.error("[NetworkTablesManager] Error creating NetworkTableInstance");
         }
     }
