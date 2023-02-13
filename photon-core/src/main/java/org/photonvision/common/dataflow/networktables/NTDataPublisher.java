@@ -117,6 +117,10 @@ public class NTDataPublisher implements CVPipelineResultConsumer {
 
         ts.updateEntries();
 
+        if (ts.subTable == null) {
+            return;
+        }
+        
         pipelineIndexListener =
                 new NTDataChangeListener(
                         ts.subTable.getInstance(), ts.pipelineIndexRequestSub, this::onPipelineIndexChange);
@@ -128,7 +132,11 @@ public class NTDataPublisher implements CVPipelineResultConsumer {
 
     public void updateCameraNickname(String newCameraNickname) {
         removeEntries();
-        ts.subTable = rootTable.getSubTable(newCameraNickname);
+
+        if (rootTable != null) {
+            ts.subTable = rootTable.getSubTable(newCameraNickname);
+        }
+
         updateEntries();
     }
 
@@ -183,7 +191,9 @@ public class NTDataPublisher implements CVPipelineResultConsumer {
         ts.heartbeatPublisher.set(heartbeatCounter++);
 
         // TODO...nt4... is this needed?
-        rootTable.getInstance().flush();
+        if (rootTable != null) {
+            rootTable.getInstance().flush();
+        }
     }
 
     public static List<PhotonTrackedTarget> simpleFromTrackedTargets(List<TrackedTarget> targets) {

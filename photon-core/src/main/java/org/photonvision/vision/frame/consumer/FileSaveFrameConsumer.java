@@ -56,7 +56,7 @@ public class FileSaveFrameConsumer implements Consumer<CVMat> {
     }
 
     public void accept(CVMat image) {
-        if (image != null && image.getMat() != null && !image.getMat().empty()) {
+        if (image != null && image.getMat() != null && !image.getMat().empty() && entry != null) {
             var curCommand = entry.get(); // default to just our current count
             if (curCommand >= 0) {
                 // Only do something if we got a valid current command
@@ -98,8 +98,11 @@ public class FileSaveFrameConsumer implements Consumer<CVMat> {
 
         // Recreate and re-init network tables structure
         this.camNickname = newCameraNickname;
-        this.subTable = rootTable.getSubTable(this.camNickname);
-        this.subTable.getEntry(ntEntryName).setInteger(imgSaveCountInternal);
-        this.entry = subTable.getIntegerTopic(ntEntryName).getEntry(-1); // Default negative
+
+        if (rootTable != null) {
+            this.subTable = rootTable.getSubTable(this.camNickname);
+            this.subTable.getEntry(ntEntryName).setInteger(imgSaveCountInternal);
+            this.entry = subTable.getIntegerTopic(ntEntryName).getEntry(-1); // Default negative
+        }
     }
 }

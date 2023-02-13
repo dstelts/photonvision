@@ -74,14 +74,16 @@ public class HardwareManager {
         this.metricsManager = new MetricsManager();
         this.metricsManager.setConfig(hardwareConfig);
 
-        ledModeRequest =
-                NetworkTablesManager.getInstance()
-                        .kRootTable
-                        .getIntegerTopic("ledModeRequest")
-                        .subscribe(-1);
-        ledModeState =
-                NetworkTablesManager.getInstance().kRootTable.getIntegerTopic("ledModeState").publish();
-        ledModeState.set(VisionLEDMode.kDefault.value);
+        if (NetworkTablesManager.getInstance().kRootTable != null) {
+            ledModeRequest =
+                    NetworkTablesManager.getInstance()
+                            .kRootTable
+                            .getIntegerTopic("ledModeRequest")
+                            .subscribe(-1);
+            ledModeState =
+                    NetworkTablesManager.getInstance().kRootTable.getIntegerTopic("ledModeState").publish();
+            ledModeState.set(VisionLEDMode.kDefault.value);
+        }
 
         CustomGPIO.setConfig(hardwareConfig);
 
@@ -98,7 +100,7 @@ public class HardwareManager {
 
         var hasBrightnessRange = hardwareConfig.ledBrightnessRange.size() == 2;
         visionLED =
-                hardwareConfig.ledPins.isEmpty()
+                hardwareConfig.ledPins.isEmpty() || NetworkTablesManager.getInstance().kRootTable == null
                         ? null
                         : new VisionLED(
                                 hardwareConfig.ledPins,
@@ -108,7 +110,7 @@ public class HardwareManager {
                                 ledModeState::set);
 
         ledModeListener =
-                visionLED == null
+                visionLED == null || NetworkTablesManager.getInstance().kRootTable == null
                         ? null
                         : new NTDataChangeListener(
                                 NetworkTablesManager.getInstance().kRootTable.getInstance(),
